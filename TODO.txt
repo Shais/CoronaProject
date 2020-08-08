@@ -1,0 +1,10 @@
+pandemic locations:
+
+shop:
+- filter is hidden by navbar
+- hover on new product
+
+login/register modals:
+- change ui
+
+manager: 

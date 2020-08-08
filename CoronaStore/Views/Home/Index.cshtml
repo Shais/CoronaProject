@@ -1,0 +1,227 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div id="welcome" class="" style="
+        height: 339px;
+        width: -webkit-fill-available !important;
+        padding: 0 !important;">
+    <div id="covidBG" src="/assets/covidBG.png" style="        max-height: 100%;
+        max-width: -webkit-fill-available;
+        box-shadow: 0px 0px 15px 2px #acacac;
+        position: relative;
+        top: -25px;
+        z-index: -176;
+        background: url(&quot;/assets/covidBG.png&quot;);
+        background-size: COVER;
+        background-repeat: no-repeat;
+        border-radius: 0px;">
+        <canvas id="ariScreenSaver" class="dvd-canvas" style="width: -webkit-fill-available; height: -webkit-fill-available;"></canvas>
+    </div>
+</div>
+
+
+<hr />
+
+<div class="container body-content">
+    <div class="secTitle">
+        <h2>News & Updates..</h2>
+    </div>
+
+    <div class="col-md-4">
+        <div class="ft-recipe">
+            <div class="ft-recipe__content">
+                <header class="content__header">
+                    <div class="row-wrapper">
+                    <h2 class="recipe-title">'Israeli mask best protection?'</h2>
+                    </div>
+                </header>
+                <p class="description">
+                An Israeli scientist has invented a mask that “seals” the face and, according to testing, blocks 99.25 percent of coronavirus-sized particles, he said.
+                Noam Gavriely helped the Israel Defense Forces develop gas 
+                masks during the Iraq War, and admits that his new product, 
+                ViriMASK, resembles some wartime protection devices and doesn’t
+                look attractive. But he said that in terms of protection, it offers
+                a significant improvement over the N95 masks...
+                </p>
+            <footer class="content__footer"><a target="_blank" href="https://nocamels.com/2020/08/israeli-mask-best-protection-coronavirus/">For more info..</a></footer>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="ft-recipe">
+            <div class="ft-recipe__content">
+                <header class="content__header">
+                    <div class="row-wrapper">
+                    <h2 class="recipe-title">Where are cases and deaths rising?</h2>
+                    </div>
+                </header>
+                <p class="description">
+                The WHO says Latin America is the epicentre of the pandemic.
+                Brazil has the second highest number of cases in the world and has
+                recorded almost 96,000 deaths, while Mexico, the second-most affected
+                country in the region, has recorded almost 49,000 deaths.
+                Cases are also increasing rapidly in Colombia, Peru, Argentina and Bolivia.
+                Iran has also been badly affected by the pandemic...
+                </p>
+            <footer class="content__footer"><a target="_blank" href="https://www.bbc.com/news/world-51235105">For the full story..</a></footer>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 newsCard">
+        <div class="ft-recipe">
+            <div class="ft-recipe__content">
+                <header class="content__header">
+                    <div class="row-wrapper">
+                    <h2 class="recipe-title">The Coronavirus Is Never Going Away</h2>
+                    </div>
+                </header>
+                <p class="description">
+                The coronavirus that causes COVID-19 has sickened more than 16.5 million people across six continents. 
+                It is raging in countries that never contained the virus. It is resurging in many of the ones that did.
+                If there was ever a time when this coronavirus could be contained, it has probably passed.
+                One outcome is now looking almost certain: This virus is never going away....
+                </p>
+            <footer class="content__footer"><a target="_blank" href="https://www.theatlantic.com/health/archive/2020/08/coronavirus-will-never-go-away/614860/">For the full story..</a></footer>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <hr />
+
+    <div class="secTitle">
+    <h2>About COVID-19</h2>
+    </div>
+    <div id="about">
+        <div class="Stories">
+
+        Coronavirus disease 2019 (COVID-19) is an infectious disease caused by severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2). It was first identified in December 2019 in Wuhan, Hubei, China, and has resulted in an ongoing pandemic. The first confirmed case has been traced back to 17 November 2019 in Hubei. As of 5 August 2020, more than 18.5 million cases have been reported across 188 countries and territories, resulting in more than 701,000 deaths. More than 11.1 million people have recovered.
+
+        Common symptoms include fever, cough, fatigue, shortness of breath, and loss of smell and taste. While the majority of cases result in mild symptoms, some progress to acute respiratory distress syndrome (ARDS) possibly precipitated by cytokine storm, multi-organ failure, septic shock, and blood clots. The time from exposure to onset of symptoms is typically around five days, but may range from two to fourteen days.
+
+        The virus is primarily spread between people during close contact, most often via small droplets produced by coughing, sneezing, and talking. The droplets usually fall to the ground or onto surfaces rather than travelling through air over long distances. However, the transmission may also occur through smaller droplets that are able to stay suspended in the air for longer periods of time in enclosed spaces, as typical for airborne diseases. Less commonly, people may become infected by touching a contaminated surface and then touching their face. It is most contagious during the first three days after the onset of symptoms, although spread is possible before symptoms appear, and from people who do not show symptoms. The standard method of diagnosis is by real-time reverse transcription polymerase chain reaction (rRT-PCR) from a nasopharyngeal swab. Chest CT imaging may also be helpful for diagnosis in individuals where there is a high suspicion of infection based on symptoms and risk factors; however, guidelines do not recommend using CT imaging for routine screening.
+
+        </div>
+    </div>
+
+    <div class="secTitle col-md-8">
+        <h2>Latest Video</h2>
+    </div>
+
+    <div class="secTitle col-md-4">
+        <h2>Latest Tweets</h2>
+    </div>
+
+    <div class="video-canvas col-md-8">
+        <video height="100%" width="650" controls poster="/assets/covidBG.png">
+            <source src="~/video/Novel coronavirus (2019-nCoV).mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="col-md-4" id="contentWrapper">
+        <div id="tweetsList" style="overflow-y: scroll">
+            <a class="twitter-timeline" href="https://twitter.com/WHO">World Health Organization Tweets</a>
+            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+
+    </div>
+    </div>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script>
+        // Adjust the function to the browser
+        window.requestAnimFrame =
+            window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+                window.setTimeout(callback, 1000 / 30);
+            };
+
+
+        var background = new Image();
+        background.src = "/assets/covidBG.png";
+        var baseImage = "/assets/covid8.png", imgW = 20, imgH = 42;
+
+
+        // Get the canvas HTML DOM object
+        var canvas = $("#ariScreenSaver")[0];
+
+        // Canvas context - on wich we will draw
+        var ctx = canvas.getContext('2d');
+        var canvasW = canvas.width, canvasH = canvas.height;
+
+        // Set the object initial location:
+        //  Math.floor will return the largest integer less than or equal to a given number
+        //  Math.random will return floating number between 0-1 (inclusive 0 but not 1)
+        var imgX = Math.floor(Math.random() * (canvasW - imgW));
+        var imgY = Math.floor(Math.random() * (canvasH - imgH));
+        var moveX, moveY = 1;
+
+        // Initial direction for the object movement
+        var xDir = "right",
+            yDir = "up";
+
+        var init = function () {
+            // File the rect with background color -
+            // so the object redraw on clean background and won't be redraw over and over again
+
+            ctx.clearRect(0, 0, canvasW, canvasH)
+            ctx.drawImage(base_image, imgX, imgY, imgW, imgH);
+
+            if (xDir == "right") {
+                if (imgX >= canvasW - imgW) {
+                    xDir = "left";
+                    imgX = imgX - moveX;
+                } else {
+                    imgX = imgX + moveX;
+                }
+            } else {
+                if (imgX <= 0) {
+                    xDir = "right";
+                    imgX = imgX + moveX;
+                } else {
+                    imgX = imgX - moveX;
+                }
+            }
+            if (yDir == "down") {
+                if (imgY >= canvasH - imgH) {
+                    yDir = "up";
+                    imgY = imgY - moveY;
+                } else {
+                    imgY = imgY + moveY;
+                }
+            } else {
+                if (imgY <= 0) {
+                    yDir = "down";
+                    imgY = imgY + moveY;
+                } else {
+                    imgY = imgY - moveY;
+                }
+            }
+
+            requestAnimFrame(init);
+        }
+
+        // In case the canvas size was changed
+        var reinit = function () {
+            canvasW = canvas.width, canvasH = canvas.height;
+            // Making sure the object won't go the same path
+            (canvasW - imgW === canvasH - imgH) ? moveX = 1.5 : moveX = 1;
+        }
+        reinit();
+
+        var base_image = new Image();
+        base_image.src = baseImage;
+        base_image.onload = function () {
+            window.addEventListener("resize", reinit);
+            init();
+        };
+
+    </script>

@@ -1,0 +1,457 @@
+﻿@model CoronaStore.Models.ProductsPageModel
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<div class="container body-content page-wrapper chiller-theme toggled">
+    <main class="page-content">
+        <section class="container-fluid">
+            <form asp-controller="Home" asp-action="Products" class="form-inline search-form">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="SearchTermName" placeholder="Search by name" aria-label="SearchName" style="width:250px">
+                    <input class="form-control" type="number" name="SearchTermPrice" placeholder="filter by max price" aria-label="SearchPrice" style="width:160px">
+
+                    <select class="form-control" name="CategoryId" aria-label="CategoryId">
+                        <option value="">Choose category</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category.CategoryID">@category.Name</option>
+                        }
+                    </select>
+
+                    <input type="submit" class="btn btn-primary" value="Filter" />
+                    <a id="filterClear" class="btn btn-danger" href="/Home/Products">Clear</a>
+                </div>
+            </form>
+
+            <div class="products">
+                @if (Session["User"] != null)
+                {
+                    foreach (var rec in Model.Recommended)
+                    {
+                        <div class="recCard card" product-id="@rec.ProductID">
+                            <div class="cardContainer">
+                                <img class="card-img-top" src="~/assets/@rec.Image" alt="@rec.Name" style='display:block; width:150px;height:150px;'>
+                                <div class="card-body">
+                                    <span class="badge badge-success">
+                                        <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> Recommended for you
+                                    </span>
+                                    <h5 class="card-title">@rec.Name</h5>
+                                    <p class="card-text">@rec.Description</p>
+                                    <a href="#" class="btn btn-primary view-product-btn">Details</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+            <hr />
+            <br />
+
+
+
+            @if (Model.Recommended == null && Model.Products.Count() == 0)
+            {
+                <h4>No results for this filter..</h4>
+            }
+
+            <div class="products">
+                @foreach (var product in Model.Products)
+                {
+                    if ((Model.Recommended != null &&
+                        Model.Recommended.Where(p => p.ProductID == product.ProductID).Count() == 0) ||
+                        Model.Recommended == null)
+                    {
+                        <!-- <div class="col-sm-4"> -->
+                        <div class="card" product-id="@product.ProductID">
+                            <div class="cardContainer">
+                                <img class="card-img-top" src="~/assets/@product.Image" alt="@product.Name" style='display:block; width:150px;height:150px;'>
+                                <div class="card-body">
+                                    @if (product.ProductID == Model.TopSale.ProductID)
+                                    {
+                                        <span class="badge badge-error">
+                                            <span class="glyphicon glyphicon-fire" aria-hidden="true"></span> Cool!
+                                        </span>
+                                    }
+                                    <h5 class="card-title">@product.Name</h5>
+                                    <p class="card-text">@product.Description</p>
+                                    <a href="#" class="btn btn-primary view-product-btn">Details</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <!-- </div> -->
+                }
+                @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                {
+                    <div id="add-product" style="cursor: pointer">
+                        <div class="card-body">
+                            <img class="card-img-top" src="~/Content/images/plus.png" style='display:block; width:150px;height:150px;'>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <input type="file" id="imageFile" style="display:none">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="product-detail-row">
+                                            <div class="col-md-6 row-title">Name:</div>
+                                            <div id="product-name" class="product-info">?</div>
+                                        </div>
+                                        <div class="product-detail-row">
+                                            <div class="col-md-6 row-title">Price:</div>
+                                            <div id="product-price" class="product-info">?</div>
+                                        </div>
+                                        <div class="product-detail-row">
+                                            <div class="col-md-6 row-title">Category:</div>
+                                            <div id="product-category" class="product-info">?</div>
+                                        </div>
+                                        <div class="product-detail-row">
+                                            <div class="col-md-6 row-title">Description:</div>
+                                            <div id="product-description" class="product-info">?</div>
+                                        </div>
+                                        <div class="product-detail-row">
+                                            <div class="col-md-6 row-title">In Stock:</div>
+                                            <div id="product-in-stock" class="product-info">?</div>
+                                        </div>
+                                        @if (@Session["User"] != null)
+                                        {
+                                            <a href="#" style="visibility:visible" id="buy-product-btn" class="btn btn-primary buy-product-btn">Buy</a>
+                                        }
+                                        else
+                                        {
+                                            <h5 style="color: red;">* You have to login to purchase..</h5>
+                                        }
+                                        @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                                        {
+                                            <button type="button" class="btn btn-default btn-sm" id="editBtn">
+                                                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-sm" id="saveBtn" style="display:none">
+                                                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-sm" id="saveNew" style="display:none">
+                                                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" id="deleteBtn">
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <input type="hidden" id="session" data-value="@Session["UserID"]" />
+
+
+
+        <div id="modal-success" class="modal fade">
+            <div class="modal-dialog modal-confirm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="icon-box">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <h4>Great!</h4>
+                        <p>הפעולה הסתיימה בהצלחה</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <!-- page-content" -->
+</div>
+<link rel="stylesheet" href="~/css/sidebar.css" />
+<link rel="stylesheet" href="~/css/products.css" />
+
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+
+<!-- page-wrapper -->
+<script>
+    jQuery(function ($) {
+
+        $(".sidebar-dropdown > a").click(function () {
+            $(".sidebar-submenu").slideUp(200);
+            if (
+                $(this)
+                    .parent()
+                    .hasClass("active")
+            ) {
+                $(".sidebar-dropdown").removeClass("active");
+                $(this)
+                    .parent()
+                    .removeClass("active");
+            } else {
+                $(".sidebar-dropdown").removeClass("active");
+                $(this)
+                    .next(".sidebar-submenu")
+                    .slideDown(200);
+                $(this)
+                    .parent()
+                    .addClass("active");
+            }
+        });
+
+        $("#close-sidebar").click(function () {
+            $(".page-wrapper").removeClass("toggled");
+        });
+        $("#show-sidebar").click(function () {
+            $(".page-wrapper").addClass("toggled");
+        });
+
+        $('#add-product').click(function (e) {
+            $.ajax('/Shop/GetAllAndNullCategories').done(function (categories) {
+                var input = "<input id='product-name-input' type='text' class='form-control' value=\></input>";
+                $('#product-name').html(input);
+
+                input = "<input id='product-price-input' type='number' class='form-control' value=\></input>";
+                $('#product-price').html(input);
+
+                var category = $('#product-category').text();
+                input = "<select id='product-category-input' class='form-control'>";
+                for (i = 0; i < categories.length; i++) {
+                    input += '<option value=' + categories[i].CategoryID;
+                    if (categories[i].Name == category)
+                        input += ' selected';
+                    input += '>' + categories[i].Name + '</option>';
+                }
+                input += "</select>";
+                $('#product-category').html(input);
+
+                input = "<textarea id='product-description-input' class='form-control' rows='3'></textarea>";
+                $('#product-description').html(input);
+
+                input = "<input id='product-in-stock-input' type='number' class='form-control' value=\></input>";
+                $('#product-in-stock').html(input);
+
+                $('#imageFile').css('display', 'block');
+                $('#editBtn').css('display', 'none');
+                $('#buy-product-btn').css('display', 'none');
+                $('#deleteBtn').css('display', 'none');
+                $('#saveNew').css('display', 'inline');
+                $('#productModal').modal();
+
+
+            }).fail(function (e) {
+                console.log('failed to fetch categories');
+            })
+
+            e.preventDefault();
+        })
+
+        $('#editBtn').click(function (e) {
+            $.ajax('/Shop/GetAllAndNullCategories').done(function (categories) {
+
+                var name = $('#product-name').text();
+                var input = "<input id='product-name-input' type='text' class='form-control' value=\"" + name + "\">";
+                $('#product-name').html(input);
+
+                var price = $('#product-price').text();
+                input = "<input id='product-price-input' type='text' class='form-control' value=\"" + price + "\">";
+                $('#product-price').html(input);
+
+                var category = $('#product-category').text();
+                input = "<select id='product-category-input' class='form-control'>";
+                for (i = 0; i < categories.length; i++) {
+                    input += '<option value=' + categories[i].CategoryID;
+                    if (categories[i].Name == category)
+                        input += ' selected';
+                    input += '>' + categories[i].Name + '</option>';
+                }
+                input += "</select>";
+                $('#product-category').html(input);
+
+                var description = $('#product-description').text();
+                input = "<textarea id='product-description-input' class='form-control' rows='3'>" + description + "</textarea>";
+                $('#product-description').html(input);
+
+                $('#imageFile').css('display', 'block');
+
+                $('#editBtn').css('display', 'none');
+                $('#saveBtn').css('display', 'inline-block');
+
+            }).fail(function (e) {
+                console.log('failed to fetch categories');
+            })
+
+            e.preventDefault();
+        })
+
+        $('#saveNew').click(function (e) {
+            var file = document.querySelector('#imageFile').files[0];
+            if (file == null) {
+                productImage = "";
+            }
+            else
+                productImage = file.name;
+                $.ajax({
+                    url: '/Home/AddProduct',
+                    method: 'POST',
+                    data: {
+                        Price: $('#product-price-input').val(),
+                        Description: $('#product-description-input').val(),
+                        CategoryID: $('#product-category-input').val(),
+                        Name: $('#product-name-input').val(),
+                        ProductID: "",
+                        Image: productImage
+                    }
+
+                }).done(function (product) {
+                    
+                    $.ajax({
+                        url: '/Home/UpdateInventory',
+                        method: 'POST',
+                        data: {
+                            ProductID: product.ProductID,
+                            Quantity: $('#product-in-stock-input').val(),
+                        }
+
+                    }).done(function (e) {
+
+                        });
+                    
+                  
+                $('#modal-success').modal();
+                    var productEl = $('.card[product-id=' + product.productID + ']');
+                    productEl.find('.card-title').html(product.productName);
+                    productEl.find('.card-text').html(product.description);
+                    if (product.image)
+                        productEl.find('.card-img-top').attr('src', product.image);
+                    $('#productModal').modal("hide");
+
+                })
+                    .fail(function (error) {
+                        alert('failed to save product. check image file size')
+                    })
+
+            e.preventDefault();
+        })
+        $('#saveBtn').click(function (e) {
+            var productId = $(this).parents('#productModal').attr('product-id');
+
+            var file = document.querySelector('#imageFile').files[0];
+            if (file == null) {
+                productImage = "";
+            }
+            else
+                productImage = file.name;
+                $.ajax({
+                    url: '/Home/UpdateProduct',
+                    method: 'POST',
+                    data: {
+                        Price: $('#product-price-input').val(),
+                        Description: $('#product-description-input').val(),
+                        CategoryID: $('#product-category-input').val(),
+                        Name: $('#product-name-input').val(),
+                        ProductID: productId,
+                        Image: productImage
+                    }
+
+                }).done(function (product) {
+                $('#modal-success').modal();
+                    var productEl = $('.card[product-id=' + product.productID + ']');
+                    productEl.find('.card-title').html(product.productName);
+                    productEl.find('.card-text').html(product.description);
+                    if (product.image)
+                        productEl.find('.card-img-top').attr('src', product.image);
+                    $('#productModal').modal("hide");
+
+                })
+                    .fail(function (error) {
+                        alert('failed to save product. check image file size')
+                    })
+
+            e.preventDefault();
+        })
+
+        $('#deleteBtn').click(function (e) {
+            var productId = $(this).parents('#productModal').attr('product-id');
+
+            $.ajax({
+                url: '/Shop/DeleteProduct?id=' + productId,
+                method: 'DELETE',
+            }).done(function (id) {
+                alert('delete success!');
+                $('.card[product-id=' + id + ']').remove();
+                $('#productModal').modal("hide");
+
+            })
+                .fail(function (error) {
+                    console.log('delete product')
+                })
+
+            e.preventDefault();
+        })
+
+
+        $(".view-product-btn").click(function (e) {
+            var productId = $(this).parents('.card').attr('product-id');
+            $.ajax('/Home/GetProduct?id=' + productId).done(function (product) {
+
+                console.log(product)
+                $('#productModal #product-name').html(product.Name);
+                $('#productModal #product-price').html(product.Price);
+                $('#productModal #product-category').html(product.Category.Name);
+                $('#productModal #product-description').html(product.Description);
+                var stockIcon = product.IsInStock ? "glyphicon-ok" : "glyphicon-remove";
+                $('#productModal #product-in-stock').html("<span class=\"glyphicon " + stockIcon + "\" aria-hidden=\"true\"></span>");
+                $('#productModal #product-image').attr('src', product.Image);
+                var bIsShowBuy = product.IsInStock ? "visibility:visible" : "visibility:hidden";
+                $('#buy-product-btn').attr('style', bIsShowBuy);
+                $('#editBtn').css('display', 'inline-block');
+                $('#saveBtn').css('display', 'none');
+                $('#imageFile').css('display', 'none');
+
+                $('#productModal').attr('product-id', productId);
+
+                $('#productModal').modal();
+            }).fail(function (product) {
+                console.log('failed to fetch product' + product);
+            })
+
+            e.preventDefault();
+        })
+
+        $(".buy-product-btn").click(function (e) {
+            var productId = $('#productModal').attr('product-id');
+            var UserID = $('#session').data('value');
+            $.ajax('/Home/BuyProduct?id=' + productId + '&userId=' + UserID).done(function (bIsSuccess) {
+                if (bIsSuccess) {
+                    $('#productModal').modal("hide");
+                    $('#modal-success').modal();
+                } else {
+                    alert('Sorry, we are out of it');
+                }
+            }).fail(function (product) {
+                alert("We had a problem");
+            })
+
+            e.preventDefault();
+        })
+    });</script>

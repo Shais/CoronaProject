@@ -1,0 +1,226 @@
+﻿@using System.Activities
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19</title>
+
+    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/Site.css" rel="stylesheet" type="text/css"/>
+
+    <script src="~/Scripts/modernizr-2.8.3.js"></script>
+</head>
+<body>
+    <div class="fixedPart">
+        <div class="web-title">
+            <div class="home-Title">
+                <a href="/">
+                    <img id="mainLogo" src="/assets/logo white.png">
+                </a>
+            </div>
+
+            @if (Session["User"] == null)
+            {
+
+                <div class="login">
+                    <a href="#" id="loginBtn" class="loginBtn">Login</a>
+                </div>
+            }
+            else
+            {
+                <div class="login">
+                    <a href="#" id="logoutBtn" class="loginBtn">Log Out</a>
+                </div>
+            }
+        </div>
+        <div id="navbar">
+                <div class="navLink">@Html.ActionLink("Home", "Index", "Home")</div>
+                <div class="navLink">@Html.ActionLink("Shop", "Products", "Home")</div>
+                <div class="navLink">@Html.ActionLink("Pandemic Locations", "Locations", "Home")</div>
+
+                @if (Session["User"] != null)
+                {
+                    <div class="navLink">@Html.ActionLink("My Shopping", "UserProducts", "Home")</div>
+                }
+                @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                {
+                    <div class="navLink">@Html.ActionLink("Manage", "Manager", "Home")</div>
+                }
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Login to Your Account</h1><br>
+                <form>
+                    <input type="text" name="user" placeholder="Username" id="loginUser">
+                    <input type="password" name="pass" placeholder="Password" id="loginPassword">
+                    <input type="submit" name="login" id="loginSubmitBtn" class="login loginmodal-submit" value="Login">
+                </form>
+
+                <div class="login-help">
+                    <a href="#" id="registerBtn">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Register</h1><br>
+                <form>
+                    <input type="text" name="user" placeholder="Username" id="RegisterUser">
+                    <input type="password" name="pass" placeholder="Password" id="RegisterPassword">
+                    <input type="text" name="fisrtName" placeholder="First name" id="firstName">
+                    <input type="text" name="lastName" placeholder="Last name" id="lastName">
+                    <input type="text" name="phone" placeholder="Phone" id="phone">
+                    <input type="text" name="address" placeholder="Address" id="address">
+
+                    <input type="submit" name="register" id="registerSubmitBtn" class="login loginmodal-submit" value="Register">
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <div class="">
+        @RenderBody()
+        <hr />
+        <footer>
+            &copy; @DateTime.Now.Year Tsenzor
+        </footer>
+    </div>
+
+    <script>
+        jQuery(function ($) {
+            $(window).scroll(function () {
+                var scroll = $(window).scrollTop();
+
+                //>=, not <=
+                if (scroll >= 100) {
+                    //clearHeader, not clearheader - caps H
+                    $(".web-title").addClass("scrolled");
+                }
+                if (scroll < 100) {
+                    //clearHeader, not clearheader - caps H
+                    $(".web-title").removeClass("scrolled");
+                }
+            });
+
+            // Login
+            $("#loginBtn").click(function (e) {
+                $('#loginModal').modal();
+                e.preventDefault();
+            })
+
+            $("#registerBtn").click(function (e) {
+                $('#loginModal').modal('hide');
+                $('#registerModal').modal();
+
+                e.preventDefault();
+            })
+
+
+            $('#loginSubmitBtn').click(function (e) {
+                var isValid = validateInputs('#loginModal');
+
+                if (isValid) {
+                    $.ajax({
+                        url: '/Users/AttemptLogin',
+                        method: 'POST',
+                        data: {
+                            Username: $('#loginUser').val(),
+                            Password: $('#loginPassword').val(),
+                        }
+                    })
+                        .done(function (result) {
+                            if (!result.LoginSucceeded) {
+                                alert('incorrect user/password');
+                                return;
+                            }
+                            location.href = '/home';
+                        })
+                        .fail(function () {
+                            console.log("login failed");
+                        })
+                }
+                e.preventDefault();
+            })
+
+
+            $('#registerSubmitBtn').click(function (e) {
+                var isValid = validateInputs('#registerModal');
+
+                if (isValid) {
+                    $.ajax('/Users/CheckName?username=' + $('#RegisterUser').val())
+                        .done(function (isUserExist) {
+                            if (isUserExist) {
+                                alert('username already exists!');
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '/Users/Register',
+                                method: 'POST',
+                                data: {
+                                    FirstName: $('#firstName').val(),
+                                    LastName: $('#lastName').val(),
+                                    Phone: $('#phone').val(),
+                                    Address: $('#address').val(),
+                                    Username: $('#RegisterUser').val(),
+                                    Password: $('#RegisterPassword').val(),
+                                }
+                            })
+                                .done(function (result) {
+                                    alert('register success!');
+                                    $('#registerModal').modal('hide');
+                                    $('#registerModal input').val('');
+                                })
+                                .fail(function (e) {
+                                    console.log('error in register');
+                                })
+                        })
+                        .fail(function (e) {
+                            console.log("failed to check username")
+                        })
+                }
+
+                e.preventDefault();
+            })
+
+            function validateInputs(parent) {
+                var isValid = true;
+
+
+                return isValid;
+            }
+
+            $('#logoutBtn').click(function (e) {
+                $.ajax('/Users/Logout')
+                    .done(function (result) {
+                        location.href = '/home';
+                    })
+                    .fail(function () {
+                        console.log("logout failed");
+                    })
+                e.preventDefault();
+            })
+        });
+    </script>
+    @RenderSection("Scripts", required: false)
+
+
+</body>
+</html>

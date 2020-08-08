@@ -1,0 +1,39 @@
+﻿body {
+}
+
+/*-----------------------------locations-----------------------------*/
+.location-list-item {
+    cursor: pointer;
+}
+
+.location-list-item:hover {
+    background: #f2f2f2;
+}
+
+li.location-list-title {
+    background-color: lightgray;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+}
+
+.forcast-card {
+    width: 100%;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+.cb-card-title {
+    display: flex;
+    align-items: center;
+}
+
+.cb-x-card {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    transition: height 2s;
+}
+.cb-x-card:hover {
+    cursor: pointer;
+}

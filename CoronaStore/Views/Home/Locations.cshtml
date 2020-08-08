@@ -1,0 +1,246 @@
+﻿@model IEnumerable<CoronaStore.Models.Location>
+
+@{
+    ViewBag.Title = "Locations";
+}
+
+<link rel="stylesheet" href="~/css/locations.css" />
+
+<div class="container body-content page-wrapper chiller-theme toggled">
+    <form asp-controller="Home" asp-action="Locations" class="form-inline search-form">
+        <h2>Locations</h2>
+
+        <div class="form-group md-form">
+            <input class="form-control" type="text" name="SearchTermName" placeholder="Search by city" aria-label="SearchName" style="width:250px">
+            <input class="form-control" type="number" name="SearchTermPopulation" placeholder="Filter by max population" aria-label="SearchPopulation" style="width:160px">
+            <input id="filterButton" type="submit" class="btn btn-primary" value="Filter" />
+            <a id="filterClear" class="btn btn-danger" href="/Home/Locations">Clear</a>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-sm-3">
+
+            <ul class="list-group">
+                <li type="button" class="list-group-item location-list-title">
+                    City Name
+                </li>
+
+                @foreach (var item in Model)
+                {
+                    <li type="button" class="list-group-item location-list-item" id="@item.LocationID">
+                        @item.City
+                    </li>
+                }
+            </ul>
+
+            <ul class="list-group" id="location-details" style="display:none;">
+                <li type="button" class="list-group-item current-location" id="cb">
+                    <div class="cb-card-title">
+                        <svg id="cb-x-card" class="cb-x-card">
+                            <path fill="none" d="M0 0h24v24H0V0z" />
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                        </svg>
+                        <h4 id="cbCity"></h4>
+                    </div>
+                    <div>
+                        <div>Address:</div>
+                        <div id="cbAddress"></div>
+                    </div>
+                    <div>
+                        <div>Date:</div>
+                        <div id="cbDate"></div>
+                    </div>
+                    <div>
+                        <div>
+                            Sick Population:
+                        </div>
+                        <div id="cbPopulation"></div>
+                    </div>
+
+                    <div id="cbForcast">
+                        <div class="loader"></div>
+                    </div>
+                    @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                    {
+                        <button type="button" class="btn btn-default btn-sm" id="editBtn">
+                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="saveBtn" style="display:none">
+                            <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteBtn">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                        </button>
+                    }
+
+
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-9">
+            <div id='printoutPanel'></div>
+            <div id='myMap' style='position:relative;width:100%;height:500px;'></div>
+        </div>
+    </div>
+</div>
+<script type='text/javascript'>
+    $(document).ready(function () {
+        $('.datepicker').datepicker();
+
+        $('#cb-x-card').click(function () {
+            $('#location-details').hide();
+        });
+    });
+
+    function weather(lat, lon) {
+        var api_url = 'http://api.openweathermap.org/data/2.5/weather?lat=' +
+            lat + '&lon=' +
+            lon + '&units=metric&appid=42f325f217132a2fa4b282b44d4a873e';
+
+        $.ajax({
+            url: api_url,
+            method: 'GET',
+            success: function (data) {
+
+                var tempr = data.main.temp;
+                var icon = data.weather[0].icon;
+
+                $('#cbForcast').text(tempr + '°');
+                $('#cbForcast').append('<img src=http://openweathermap.org/img/w/' + icon + '.png>');
+            }
+        });
+    }
+
+    // When the user select location:
+    // 1. zooms in
+    // 2. show the card with the current location details
+    // 3. mark the currect location list item
+    function locationSelected(args, locationListItem) {
+        var pushpin;
+        if (locationListItem === undefined) {
+            pushpin = args.target;
+            locationListItem = $("#" + pushpin.metadata.locationID);
+        } else {
+            pushpin = map.entities.get(locationListItem[0].id-2);
+        }
+
+        $("li.location-list-item").css('background-color', 'white');
+        $(locationListItem).css('background-color', '#f2f2f2');
+        $("#location-details").css('display', 'inherit');
+
+        map.setView({ center: pushpin.getLocation(), zoom: 15 });
+        $("#cbCity").text(pushpin.metadata.City);
+        $("#cbAddress").text(pushpin.metadata.Address);
+        $("#cbDate").text(pushpin.metadata.Date);
+        $("#cbPopulation").text(pushpin.metadata.Population);
+
+        weather(pushpin.getLocation().latitude, pushpin.getLocation().longitude);
+    }
+
+
+
+    // When the user closes the card the map zooms out
+    // unmark the currect location list item
+    function infoboxClosed() {
+        if (!infobox.getVisible()) {
+            $("li.location-list-item").css('background-color', 'white');
+            map.setView({
+                center: new Microsoft.Maps.Location(31.96482358762261, 34.99964556250001),
+                zoom: 8
+            });
+        }
+    }
+
+    function loadMapScenario() {
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+            // Map settings when loading. Map center set to Sgula, Israel.
+            credentials: 'Aoe9qNuzrXqzV9N97QUrO_TDmXB1mKLe9cSAsj6MhBvWV5GfJwFnmzs1KxxbG-BG',
+            center: new Microsoft.Maps.Location(31.96482358762261, 34.99964556250001),
+            zoom: 8
+        });
+
+        // Push pin for every location
+        // Get the locations list from the srver side and convert to JSON array
+        var location;
+        var pushpin;
+
+
+        var locations = @Html.Raw(Json.Encode(Model));
+
+
+        for (var i = 0; i < locations.length; i++) {
+            location = new Microsoft.Maps.Location(locations[i].Latitude, locations[i].Longitude);
+            pushpin = new Microsoft.Maps.Pushpin(location,5);
+            pushpin.metadata = locations[i];
+            map.entities.push(pushpin);
+            Microsoft.Maps.Events.addHandler(pushpin, 'click', (args) => { locationSelected(args); });
+        }
+    }
+
+    var clickedLocation;
+    // Handel list iten click
+    $(".location-list-item").click(function () {
+        clickedLocation = $(this);
+        locationSelected(null, $(this));
+    });
+
+    $('#editBtn').click(function (e) {
+
+        var population = $('#cbPopulation').text();
+        var input = "<input id='cbPopulation-input' type='text' class='form-control' value=\"" + population + "\">";
+        $('#cbPopulation').html(input);
+
+            $('#editBtn').css('display', 'none');
+            $('#saveBtn').css('display', 'inline-block');
+
+        e.preventDefault();
+    })
+
+
+    $('#saveBtn').click(function (e) {
+        var LocationId = clickedLocation.attr('id');
+        var Population = $('#cbPopulation-input').val();
+        $.ajax({
+            url: '/Home/UpdateLocation',
+            method: 'POST',
+            data: {
+                Population: Population,
+                LocationID: LocationId,
+            }
+        }).done(function (product) {
+            alert('save success!');
+        })
+    })
+    $('#deleteBtn').click(function (e) {
+        var LocationId = clickedLocation.attr('id');
+
+        $.ajax({
+            url: '/Home/DeleteLocation?id=' + LocationId,
+                method: 'DELETE',
+            }).done(function (id) {
+                alert('delete success!');
+            })
+            .fail(function (error) {
+                console.log('delete location')
+            })
+
+        e.preventDefault();
+    })
+
+
+    $("#cb-x-card").click(function () {
+        $("#location-details").css('disp lay', 'none');
+        $("li.location-list-item").css('background-color', 'white');
+        map.setView({
+            center: new Microsoft.Maps.Location(31.96482358762261, 34.99964556250001),
+            zoom: 8
+        });
+    });
+
+</script>
+
+<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=loadMapScenario' async defer></script>
+<!-- Include Bootstrap Datepicker -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
